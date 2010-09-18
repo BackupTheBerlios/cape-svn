@@ -6,8 +6,9 @@
  * Jeremy Guillory
  *
  * @date
- * Created on September 14, 2010, 11:30 AM
- **/
+ * Last modified on September 14, 2010, 11:30 AM
+ */
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/signal.h>
@@ -26,10 +27,12 @@
  * Checks if valid data is coming across the serial port, and buffers it into
  * an array so that it may be decoded.
  *
- * @param
+ * @param status
  * int representing the signal number.
+ *
+ *
  */
-void signal_handler_IO (int);
+void signal_handler_IO (int status);
 int sig = 0;
 int fd;
 
@@ -39,7 +42,6 @@ char command[5];
 
 /**
  * Configures the serial port.
- *
  */
 void configure_port(void);
 
@@ -159,7 +161,7 @@ void configure_port()
 
 void signal_handler_IO (int status)
 {
-	char buff[100];
+        char buff[100];
 	int i, ret = read(fd, buff, 99);
 	buff[ret] = 0;
 
