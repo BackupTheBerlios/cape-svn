@@ -9,7 +9,7 @@
  * Last modified on September 14, 2010, 11:30 AM
  */
 
-//test the differences
+//test NEW DIFFERENCES
 
 #include <sys/types.h>
 #include <sys/stat.h>
