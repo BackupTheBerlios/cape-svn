@@ -1,0 +1,99 @@
+\hypertarget{main_8c_09_09}{
+\section{/home/jeremy/NetBeansProjects/Comm/main.c++ File Reference}
+\label{main_8c_09_09}\index{/home/jeremy/NetBeansProjects/Comm/main.c++@{/home/jeremy/NetBeansProjects/Comm/main.c++}}
+}
+
+
+main.cpp  
+
+
+{\ttfamily \#include $<$pthread.h$>$}\par
+{\ttfamily \#include \char`\"{}FileManager.h\char`\"{}}\par
+{\ttfamily \#include \char`\"{}ComPort.h\char`\"{}}\par
+\subsection*{Defines}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{main_8c_09_09_aa8ddf20cdd716b652e76e23e5e700893}{
+\#define {\bfseries uchar}~unsigned char}
+\label{main_8c_09_09_aa8ddf20cdd716b652e76e23e5e700893}
+
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{main_8c_09_09_a25638689fdf13290a7da74f4359ce3af}{
+void {\bfseries signalHandler1} (int status)}
+\label{main_8c_09_09_a25638689fdf13290a7da74f4359ce3af}
+
+\item 
+\hypertarget{main_8c_09_09_a3c04138a5bfe5d72780bb7e82a18e627}{
+int {\bfseries main} (int argc, char $\ast$$\ast$argv)}
+\label{main_8c_09_09_a3c04138a5bfe5d72780bb7e82a18e627}
+
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{main_8c_09_09_a0c30828d4cc483a0fbf6de0696834909}{
+const int {\bfseries MAX\_\-PACKET\_\-SIZE} = 59}
+\label{main_8c_09_09_a0c30828d4cc483a0fbf6de0696834909}
+
+\item 
+\hypertarget{main_8c_09_09_a68be1f65e6d1f2949835d9b6b44bcf8e}{
+int {\bfseries sig} = 0}
+\label{main_8c_09_09_a68be1f65e6d1f2949835d9b6b44bcf8e}
+
+\item 
+\hypertarget{main_8c_09_09_a2fd1e6fd28793c225f46fb7ef1ff8556}{
+bool {\bfseries isCommandReceived} = false}
+\label{main_8c_09_09_a2fd1e6fd28793c225f46fb7ef1ff8556}
+
+\item 
+\hypertarget{main_8c_09_09_a273127dc7aa7a815abef121f7fb3bd90}{
+char {\bfseries command} \mbox{[}5\mbox{]}}
+\label{main_8c_09_09_a273127dc7aa7a815abef121f7fb3bd90}
+
+\item 
+\hypertarget{main_8c_09_09_a63d1c87e88c3f67e6bbe833505677d57}{
+\hyperlink{class_com_port}{ComPort} $\ast$ {\bfseries port1}}
+\label{main_8c_09_09_a63d1c87e88c3f67e6bbe833505677d57}
+
+\item 
+\hypertarget{main_8c_09_09_a2b2c999da761f10734843bf52e70c430}{
+uchar $\ast$ {\bfseries tempDataBuffer}}
+\label{main_8c_09_09_a2b2c999da761f10734843bf52e70c430}
+
+\item 
+\hypertarget{main_8c_09_09_a580cd1c0e3067b18b9de515e7c61dac1}{
+bool {\bfseries isFilePacket} = false}
+\label{main_8c_09_09_a580cd1c0e3067b18b9de515e7c61dac1}
+
+\item 
+\hypertarget{main_8c_09_09_aaecf401f570ab56b5ceceb14d10fb167}{
+int {\bfseries ses}}
+\label{main_8c_09_09_aaecf401f570ab56b5ceceb14d10fb167}
+
+\item 
+\hypertarget{main_8c_09_09_a6f5f3480b66f3cc414fd0d6dfcf54046}{
+int {\bfseries block}}
+\label{main_8c_09_09_a6f5f3480b66f3cc414fd0d6dfcf54046}
+
+\item 
+\hypertarget{main_8c_09_09_af1d915d4a4c90d4fe443eb08234e79a0}{
+int {\bfseries leng}}
+\label{main_8c_09_09_af1d915d4a4c90d4fe443eb08234e79a0}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyAuthor}{Author}
+Jeremy Guillory
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+Last modified on September 14, 2010, 11:30 AM 
+\end{DoxyDate}
+
+
+Definition in file \hyperlink{main_8c_09_09_source}{main.c++}.
+

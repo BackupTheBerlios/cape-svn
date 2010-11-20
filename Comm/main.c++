@@ -22,7 +22,7 @@ using namespace std;
 const int MAX_PACKET_SIZE = 59;
 
 int sig = 0;
-bool command_received = false;
+bool isCommandReceived = false;
 char command[5];
 ComPort* port1;
 //this is only for testing
@@ -35,7 +35,7 @@ int ses, block, leng;
 
 void signalHandler1 (int status)
 {
-    port1->signalHandler();
+    ::port1->signalHandler();
 }
 
 
@@ -43,37 +43,43 @@ void signalHandler1 (int status)
 
 int main(int argc, char** argv)
 {
-    FileManager fileInterface;
-    port1 = new ComPort(1);
-    //fileInterface.startSession("newOne.dat");
-
-    int i = 0;
-    //port1.sendCommandPacket(buffer, 5);
+    FileManager fileManager;
+    ::port1 = new ComPort(1);
     printf("Starting.\n");
     while(1)
     {
         sleep(100);
-        if (command_received)
+        if (::isCommandReceived)
         {
             //cout<<"\nCommand Received!\n";
-            if(isFilePacket)
+            if(::isFilePacket)
             {
                 //printf("\nFile byte: %2x\n", tempDataBuffer[0]);
-                fileInterface.writeBlock(ses, block, leng, tempDataBuffer);
+                fileManager.writeBlock(::ses, ::block, ::leng, ::tempDataBuffer);
 
             }
             else
             {
-                if (tempDataBuffer[0] == 0xFB)
+                if (::tempDataBuffer[0] == 0xFB)
                 {
-                    string fileName((char*)(tempDataBuffer+2));
+                    string fileName((char*)(::tempDataBuffer+2));
                     //sprintf(fileName, "%s", tempDataBuffer+2);
-                    fileInterface.startSession(fileName);
-                    delete[] tempDataBuffer;
+                    fileManager.startSession(fileName);
+                    delete[] ::tempDataBuffer;
+                    ::tempDataBuffer = NULL;
                 }
-                if (tempDataBuffer[0] == 0xF)
+                else if (::tempDataBuffer[0] == 0xFA)
+                {
+                    //Abort Session
+                    //printf("\n%2x\n", tempDataBuffer[1]);
+                    //printf("\n%2x\n", tempDataBuffer[2]);
+                    
+                    fileManager.endSession((int)(::tempDataBuffer[2]));
+                    delete[] ::tempDataBuffer;
+                    ::tempDataBuffer = NULL;
+                }
             }
-            command_received = false;
+            ::isCommandReceived = false;
 
         }
     }

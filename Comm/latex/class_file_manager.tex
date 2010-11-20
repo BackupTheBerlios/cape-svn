@@ -1,0 +1,107 @@
+\hypertarget{class_file_manager}{
+\section{FileManager Class Reference}
+\label{class_file_manager}\index{FileManager@{FileManager}}
+}
+
+
+A class to handle data transfers with the filesystem.  
+
+
+
+
+{\ttfamily \#include $<$FileManager.h$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_file_manager_a8afd512c06be9daf140cc19d71f9b391}{FileManager} ()
+\begin{DoxyCompactList}\small\item\em Default constructor for the class. \item\end{DoxyCompactList}\item 
+void \hyperlink{class_file_manager_a9b00c266d6a279a7fe9d1b18649d93c7}{writeBlock} (int sessionId, int blockId, int length, uchar $\ast$data)
+\begin{DoxyCompactList}\small\item\em Writes a block of file data to the filesystem. \item\end{DoxyCompactList}\item 
+void \hyperlink{class_file_manager_aa4e29db00b18f76e9077ccfae86ead2e}{readBlock} (uchar sessionId, uchar blockId)
+\begin{DoxyCompactList}\small\item\em Reads a block of data from the filesystem. \item\end{DoxyCompactList}\item 
+void \hyperlink{class_file_manager_ab6fdba3fb4643d07e387f67d46f264f2}{startSession} (string fileName)
+\begin{DoxyCompactList}\small\item\em Opens a file transfer session. \item\end{DoxyCompactList}\item 
+void \hyperlink{class_file_manager_a789e8afe9bb1d763e86e9bb97c48bff2}{endSession} (int sessionId)
+\begin{DoxyCompactList}\small\item\em Closes a file transfer session. \item\end{DoxyCompactList}\item 
+\hyperlink{class_file_manager_abaed33b5b0c13b8a597db9335a1aacfa}{$\sim$FileManager} ()
+\begin{DoxyCompactList}\small\item\em Standard destructor. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Will be used to perform reads and writes to an SD card on the CDH subsystem. Mutual exclusion must be enforced to avoid race conditions which may occur due to the multithreaded approach of our implementation. 
+
+Definition at line 41 of file FileManager.h.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{class_file_manager_a8afd512c06be9daf140cc19d71f9b391}{
+\index{FileManager@{FileManager}!FileManager@{FileManager}}
+\index{FileManager@{FileManager}!FileManager@{FileManager}}
+\subsubsection[{FileManager}]{\setlength{\rightskip}{0pt plus 5cm}FileManager::FileManager ()}}
+\label{class_file_manager_a8afd512c06be9daf140cc19d71f9b391}
+Initializes POSIX lock, creates the session file if it does not already exist, or recovers session data from a pre-\/existing session file. 
+
+Definition at line 16 of file FileManager.c++.
+
+\hypertarget{class_file_manager_abaed33b5b0c13b8a597db9335a1aacfa}{
+\index{FileManager@{FileManager}!$\sim$FileManager@{$\sim$FileManager}}
+\index{$\sim$FileManager@{$\sim$FileManager}!FileManager@{FileManager}}
+\subsubsection[{$\sim$FileManager}]{\setlength{\rightskip}{0pt plus 5cm}FileManager::$\sim$FileManager ()}}
+\label{class_file_manager_abaed33b5b0c13b8a597db9335a1aacfa}
+Deletes all dynamically allocated memory. 
+
+Definition at line 244 of file FileManager.c++.
+
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_file_manager_a789e8afe9bb1d763e86e9bb97c48bff2}{
+\index{FileManager@{FileManager}!endSession@{endSession}}
+\index{endSession@{endSession}!FileManager@{FileManager}}
+\subsubsection[{endSession}]{\setlength{\rightskip}{0pt plus 5cm}void FileManager::endSession (int {\em sessionId})}}
+\label{class_file_manager_a789e8afe9bb1d763e86e9bb97c48bff2}
+Removes the session from the session file and sends a response regarding if any errors were encountered in the procedure. 
+
+Definition at line 180 of file FileManager.c++.
+
+\hypertarget{class_file_manager_aa4e29db00b18f76e9077ccfae86ead2e}{
+\index{FileManager@{FileManager}!readBlock@{readBlock}}
+\index{readBlock@{readBlock}!FileManager@{FileManager}}
+\subsubsection[{readBlock}]{\setlength{\rightskip}{0pt plus 5cm}void FileManager::readBlock (uchar {\em sessionId}, \/  uchar {\em blockId})}}
+\label{class_file_manager_aa4e29db00b18f76e9077ccfae86ead2e}
+Reads a block of a file as specified by the parameters.
+
+This is done through the use of a lock to ensure mutual exclusion. The data read from the file will be sent to the communication interface to be transmitted. 
+
+Definition at line 95 of file FileManager.c++.
+
+\hypertarget{class_file_manager_ab6fdba3fb4643d07e387f67d46f264f2}{
+\index{FileManager@{FileManager}!startSession@{startSession}}
+\index{startSession@{startSession}!FileManager@{FileManager}}
+\subsubsection[{startSession}]{\setlength{\rightskip}{0pt plus 5cm}void FileManager::startSession (string {\em fileName})}}
+\label{class_file_manager_ab6fdba3fb4643d07e387f67d46f264f2}
+Creates an entry in the session file to begin a file transfer.
+
+The name of the file as well as the ID for the session will be stored in the session file, and then a response is created and sent to the communication interface for transmission. Note that only 20 sessions may exist at any given time. 
+
+Definition at line 105 of file FileManager.c++.
+
+\hypertarget{class_file_manager_a9b00c266d6a279a7fe9d1b18649d93c7}{
+\index{FileManager@{FileManager}!writeBlock@{writeBlock}}
+\index{writeBlock@{writeBlock}!FileManager@{FileManager}}
+\subsubsection[{writeBlock}]{\setlength{\rightskip}{0pt plus 5cm}void FileManager::writeBlock (int {\em sessionId}, \/  int {\em blockId}, \/  int {\em length}, \/  uchar $\ast$ {\em data})}}
+\label{class_file_manager_a9b00c266d6a279a7fe9d1b18649d93c7}
+Write length bytes from data to the location corresponding to blockId in the file associated with sessioId.
+
+This file access ensures mutual exclusion through the use of a POSIX thread lock. After the operation is performed, a response is created and sent to the communication interface for transmission. 
+
+Definition at line 59 of file FileManager.c++.
+
+
+
+The documentation for this class was generated from the following files:\begin{DoxyCompactItemize}
+\item 
+/home/jeremy/NetBeansProjects/Comm/\hyperlink{_file_manager_8h}{FileManager.h}\item 
+/home/jeremy/NetBeansProjects/Comm/\hyperlink{_file_manager_8c_09_09}{FileManager.c++}\end{DoxyCompactItemize}

@@ -1,0 +1,83 @@
+\hypertarget{class_com_port}{
+\section{ComPort Class Reference}
+\label{class_com_port}\index{ComPort@{ComPort}}
+}
+
+
+A class to handle data transfer over a serial port.  
+
+
+
+
+{\ttfamily \#include $<$ComPort.h$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_com_port_af492fe14608a429a24d851f9f2f44a2e}{ComPort} (int)
+\begin{DoxyCompactList}\small\item\em Parameterized constructor that will support opening multiple serial ports. \item\end{DoxyCompactList}\item 
+void \hyperlink{class_com_port_a6cbd25d3c52c3fd250109e86d998ce4b}{signalHandler} ()
+\begin{DoxyCompactList}\small\item\em Handles incoming data on the serial port. \item\end{DoxyCompactList}\item 
+int \hyperlink{class_com_port_a60fac67ef62cd6ab7cc33cb23a0896e3}{sendPacket} (uchar $\ast$buffer, int length)
+\begin{DoxyCompactList}\small\item\em Sends data to the corresponding serial port for transmission. \item\end{DoxyCompactList}\item 
+\hyperlink{class_com_port_a60f4557b68a559975a0404f77480e038}{$\sim$ComPort} ()
+\begin{DoxyCompactList}\small\item\em Standard destructor function. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This Linux specific class properly configures a serial port to handle USART communication between the CDH subsystem of CAPE2 and the Power, Communication, and Software Defined Radio subsystems. 
+
+Definition at line 44 of file ComPort.h.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{class_com_port_af492fe14608a429a24d851f9f2f44a2e}{
+\index{ComPort@{ComPort}!ComPort@{ComPort}}
+\index{ComPort@{ComPort}!ComPort@{ComPort}}
+\subsubsection[{ComPort}]{\setlength{\rightskip}{0pt plus 5cm}ComPort::ComPort (int {\em port})}}
+\label{class_com_port_af492fe14608a429a24d851f9f2f44a2e}
+Parameterized constructor which establishes the correct configuration for the port and sets up the signal handler to trigger on incoming data. 
+
+Definition at line 15 of file ComPort.c++.
+
+\hypertarget{class_com_port_a60f4557b68a559975a0404f77480e038}{
+\index{ComPort@{ComPort}!$\sim$ComPort@{$\sim$ComPort}}
+\index{$\sim$ComPort@{$\sim$ComPort}!ComPort@{ComPort}}
+\subsubsection[{$\sim$ComPort}]{\setlength{\rightskip}{0pt plus 5cm}ComPort::$\sim$ComPort ()}}
+\label{class_com_port_a60f4557b68a559975a0404f77480e038}
+Deletes all dynamically created data and closes the serial port. 
+
+Definition at line 284 of file ComPort.c++.
+
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_com_port_a60fac67ef62cd6ab7cc33cb23a0896e3}{
+\index{ComPort@{ComPort}!sendPacket@{sendPacket}}
+\index{sendPacket@{sendPacket}!ComPort@{ComPort}}
+\subsubsection[{sendPacket}]{\setlength{\rightskip}{0pt plus 5cm}int ComPort::sendPacket (uchar $\ast$ {\em buffer}, \/  int {\em length})}}
+\label{class_com_port_a60fac67ef62cd6ab7cc33cb23a0896e3}
+Writes 'length' amount of bytes from buffer to the port.
+
+The data in buffer must be properly formatted using protocols outlined in the CDH Protocols document before being this function is called. 
+
+Definition at line 275 of file ComPort.c++.
+
+\hypertarget{class_com_port_a6cbd25d3c52c3fd250109e86d998ce4b}{
+\index{ComPort@{ComPort}!signalHandler@{signalHandler}}
+\index{signalHandler@{signalHandler}!ComPort@{ComPort}}
+\subsubsection[{signalHandler}]{\setlength{\rightskip}{0pt plus 5cm}void ComPort::signalHandler ()}}
+\label{class_com_port_a6cbd25d3c52c3fd250109e86d998ce4b}
+Equivalent of an interrupt service routine in Linux.
+
+Interrupts in Linux are implemented using ANSI C, so handlers must not be member functions. To maintain encapsulation, this member function is called from within the C-\/style handler function. 
+
+Definition at line 103 of file ComPort.c++.
+
+
+
+The documentation for this class was generated from the following files:\begin{DoxyCompactItemize}
+\item 
+/home/jeremy/NetBeansProjects/Comm/\hyperlink{_com_port_8h}{ComPort.h}\item 
+/home/jeremy/NetBeansProjects/Comm/\hyperlink{_com_port_8c_09_09}{ComPort.c++}\end{DoxyCompactItemize}

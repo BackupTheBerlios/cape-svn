@@ -1,0 +1,83 @@
+\hypertarget{_com_port_8h}{
+\section{/home/jeremy/NetBeansProjects/Comm/ComPort.h File Reference}
+\label{_com_port_8h}\index{/home/jeremy/NetBeansProjects/Comm/ComPort.h@{/home/jeremy/NetBeansProjects/Comm/ComPort.h}}
+}
+
+
+Contains the prototype for the \hyperlink{class_com_port}{ComPort} class.  
+
+
+{\ttfamily \#include $<$termios.h$>$}\par
+{\ttfamily \#include $<$fcntl.h$>$}\par
+{\ttfamily \#include $<$stdio.h$>$}\par
+{\ttfamily \#include $<$stdlib.h$>$}\par
+{\ttfamily \#include $<$unistd.h$>$}\par
+{\ttfamily \#include $<$string.h$>$}\par
+{\ttfamily \#include $<$sys/signal.h$>$}\par
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{class_com_port}{ComPort}
+\begin{DoxyCompactList}\small\item\em A class to handle data transfer over a serial port. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Defines}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{_com_port_8h_a734bbab06e1a9fd2e5522db0221ff6e3}{
+\#define {\bfseries BAUDRATE}~B9600}
+\label{_com_port_8h_a734bbab06e1a9fd2e5522db0221ff6e3}
+
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{_com_port_8h_a25638689fdf13290a7da74f4359ce3af}{
+void {\bfseries signalHandler1} (int status)}
+\label{_com_port_8h_a25638689fdf13290a7da74f4359ce3af}
+
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{_com_port_8h_a2b2c999da761f10734843bf52e70c430}{
+uchar $\ast$ {\bfseries tempDataBuffer}}
+\label{_com_port_8h_a2b2c999da761f10734843bf52e70c430}
+
+\item 
+\hypertarget{_com_port_8h_a580cd1c0e3067b18b9de515e7c61dac1}{
+bool {\bfseries isFilePacket}}
+\label{_com_port_8h_a580cd1c0e3067b18b9de515e7c61dac1}
+
+\item 
+\hypertarget{_com_port_8h_aaecf401f570ab56b5ceceb14d10fb167}{
+int {\bfseries ses}}
+\label{_com_port_8h_aaecf401f570ab56b5ceceb14d10fb167}
+
+\item 
+\hypertarget{_com_port_8h_a6f5f3480b66f3cc414fd0d6dfcf54046}{
+int {\bfseries block}}
+\label{_com_port_8h_a6f5f3480b66f3cc414fd0d6dfcf54046}
+
+\item 
+\hypertarget{_com_port_8h_af1d915d4a4c90d4fe443eb08234e79a0}{
+int {\bfseries leng}}
+\label{_com_port_8h_af1d915d4a4c90d4fe443eb08234e79a0}
+
+\item 
+\hypertarget{_com_port_8h_a2fd1e6fd28793c225f46fb7ef1ff8556}{
+bool {\bfseries isCommandReceived}}
+\label{_com_port_8h_a2fd1e6fd28793c225f46fb7ef1ff8556}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyAuthor}{Author}
+Jeremy Guillory 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+Created on November 12, 2010, 3:00 PM 
+\end{DoxyDate}
+
+
+Definition in file \hyperlink{_com_port_8h_source}{ComPort.h}.
+
