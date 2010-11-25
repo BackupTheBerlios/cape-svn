@@ -27,9 +27,16 @@ using std::string;
 using std::ifstream;
 using std::ofstream;
 using std::ios;
+using std::fstream;
 
 extern ComPort* port1;
 extern const int MAX_PACKET_SIZE;
+
+struct Session
+{
+    string name;
+    bool isUpload;
+};
 
 /**
  * A class to handle data transfers with the filesystem.
@@ -48,10 +55,10 @@ public:
     void writeBlock(int sessionId, int blockId, int length, uchar* data);
 
     ///Reads a block of data from the filesystem.
-    void readBlock(uchar sessionId, uchar blockId);
+    void readBlock(int sessionId, int blockId);
 
     ///Opens a file transfer session.
-    void startSession(string fileName);
+    void startSession(string fileName, bool isUpload);
 
     ///Closes a file transfer session.
     void endSession(int sessionId);
@@ -71,7 +78,7 @@ private:
     pthread_mutex_t* fileLock_;
 
     ///An internal list of the file names associated with a transfer session.
-    string sessionFiles_[20];
+    Session sessionFiles_[20];
 };
 
 #endif	/* CAPE_CDH_FILEMANAGER_H */

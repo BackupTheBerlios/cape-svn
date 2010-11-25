@@ -17,7 +17,11 @@ FileManager::FileManager()
 {
     int session;
     string fileName;
+    bool isUpload;
     ifstream sessionFile;
+
+    //Create directory file
+     system("ls -p | grep -v \"/\">ls.txt");
 
     //Create and initialize lock
     fileLock_ = new pthread_mutex_t;
@@ -34,9 +38,10 @@ FileManager::FileManager()
         //Read all entries in file
         while(!sessionFile.eof())
         {
-            sessionFile>>fileName;
-              cout<<session<<" "<<fileName<<"\n";
-            sessionFiles_[session] = fileName;
+            sessionFile>>fileName>>isUpload;
+            //cout<<session<<" "<<fileName<<"\n";
+            sessionFiles_[session].name = fileName;
+            sessionFiles_[session].isUpload = isUpload;
             sessionFile>>session;
         }
         sessionFile.close();
@@ -62,14 +67,14 @@ void FileManager::writeBlock(int sessionId, int blockId, int length, uchar* data
     acquireLock();
 
     //Get the name of the file corresponding to the session
-    char *fileNameChar = (char*)sessionFiles_[sessionId].c_str();
+    char *fileNameChar = (char*)sessionFiles_[sessionId].name.c_str();
     
     //Open the file that is associated with the transfer session
-    ofstream file;
-    file.open(fileNameChar,ios::binary | ios::app);
+    fstream file;
+    file.open(fileNameChar,ios::binary|ios::in|ios::out);
     
     //Seek the starting point of the write
-    file.seekp(blockId*MAX_PACKET_SIZE, ios::beg);
+    file.seekp((blockId-1)*MAX_PACKET_SIZE, ios::beg);
 
     //Write the data
     file.write(reinterpret_cast<char*>(data), length);
@@ -92,8 +97,78 @@ void FileManager::writeBlock(int sessionId, int blockId, int length, uchar* data
  * the use of a lock to ensure mutual exclusion.  The data read from the file
  * will be sent to the communication interface to be transmitted.
  */
-void FileManager::readBlock(uchar sessionId, uchar blockId)
+void FileManager::readBlock(int sessionId, int blockId)
 {
+    uchar* data = new uchar[MAX_PACKET_SIZE];
+    //Ensure mutual exclusion for file access
+    acquireLock();
+
+    //Get the name of the file corresponding to the session
+    char *fileNameChar = (char*)sessionFiles_[sessionId].name.c_str();
+
+    //Open the file that is associated with the transfer session
+    ifstream file;
+    file.open(fileNameChar,ios::binary|ios::in);
+    if(!file.is_open())
+    {
+        //printf("\nFAIL\n");
+
+    }
+    //Get the length of the file
+    file.seekg(0, ios::end);
+    long length = file.tellg();
+
+    //Seek the starting point of the write
+    file.seekg((blockId-1)*MAX_PACKET_SIZE, ios::beg);
+
+    long remaining = length - file.tellg();
+    //printf("\nBLOCKID: %i REMAIN: %d  length: %d\n",blockId ,remaining, length);
+    //Check if this is the last packet in the file
+    if(remaining < MAX_PACKET_SIZE)
+    {
+        file.read((char*)data, (int)remaining);
+
+        //Generate and send response
+        //Create and send response
+        uchar headerData[] = {0xC0, 0x00, 0xA8, 0x8A, 0xA6, 0xA8, 0x40, 0x40,
+                              0x60, 0x96, 0x6A, 0xAA, 0xA6, 0x98, 0x40, 0x61,
+                              0x03, 0xF0, 0x00, 0xFD, 0x00, 0x00, 0x00, 0x00,
+                              0x00};
+        headerData[20] = (uchar)remaining;
+        headerData[21] = (uchar)sessionId;
+        headerData[24] = (uchar)blockId;
+        uchar lastByte[] = {0xC0};
+        ::port1->sendPacket(headerData, 25);
+        ::port1->sendPacket(data, (int)remaining);
+        ::port1->sendPacket(lastByte, 1);
+
+    }
+    else
+    {
+        //Read the data
+        file.read(reinterpret_cast<char*>(data), MAX_PACKET_SIZE);
+    
+        //Generate and send response
+        //Create and send response
+        uchar headerData[] = {0xC0, 0x00, 0xA8, 0x8A, 0xA6, 0xA8, 0x40, 0x40, 
+                              0x60, 0x96, 0x6A, 0xAA, 0xA6, 0x98, 0x40, 0x61, 
+                              0x03, 0xF0, 0x00, 0xFD, 0x00, 0x00, 0x00, 0x00,
+                              0x00};
+        headerData[20] = (uchar)MAX_PACKET_SIZE;
+        headerData[21] = (uchar)sessionId;
+        headerData[24] = (uchar)blockId;
+        uchar lastByte[] = {0xC0};
+        ::port1->sendPacket(headerData, 25);
+        ::port1->sendPacket(data, MAX_PACKET_SIZE);
+        ::port1->sendPacket(lastByte, 1);
+    
+    }
+
+
+    file.close();
+
+    //File access complete
+    releaseLock();
 }
 
 /**
@@ -102,8 +177,9 @@ void FileManager::readBlock(uchar sessionId, uchar blockId)
  * file, and then a response is created and sent to the communication interface
  * for transmission. Note that only 20 sessions may exist at any given time.
  */
-void FileManager::startSession(string fileName)
+void FileManager::startSession(string fileName, bool isUpload)
 {
+    //printf("start session\n");
     //sessionId will remain -1 if no free sessionId's are available
     int sessionId = -1;
     int i = 0;
@@ -111,14 +187,14 @@ void FileManager::startSession(string fileName)
     //Check that a session does not already exist for this file name
     while(i<20)
     {
-        if (sessionFiles_[i] == fileName)
+        if (sessionFiles_[i].name == fileName)
         {
             //TODO error point here...session already exists for this file name
-            cout<<"A session already exists for this file name.\n";
+            //cout<<"A session already exists for this file name.\n";
             isError = true;
         }
         //Make the sessionId the lowest available sessionId
-        if((sessionFiles_[i] == "")&&(sessionId == -1))
+        if((sessionFiles_[i].name == "")&&(sessionId == -1))
             sessionId = i;
         i++;
     }
@@ -130,7 +206,8 @@ void FileManager::startSession(string fileName)
     //If a session was assigned, update the session file
     if(!isError)
     {
-        sessionFiles_[sessionId] = fileName;
+        sessionFiles_[sessionId].name = fileName;
+        sessionFiles_[sessionId].isUpload = isUpload;
         ofstream sessionFile;
         //Starting file access
         acquireLock();
@@ -138,30 +215,73 @@ void FileManager::startSession(string fileName)
         if (sessionFile.is_open())
         {
             //Write the sessionId and file name to the file
-            sessionFile<<sessionId<<" "<<fileName<<"\n";
+            sessionFile<<sessionId<<" "<<fileName<<" "<<isUpload<<"\n";
             sessionFile.close();
   
             char *fileNameChar = (char*)fileName.c_str();
 
-            //TODO: this needs to be removed for downloads
-
-            //Create the file that is to be uploaded
-            sessionFile.open(fileNameChar, ios::trunc);
-            if(!sessionFile.is_open())
+            if (isUpload)
             {
-                //TODO: Error point, file was not created
+                //printf("\nUploading\n");
+                //Create the file that is to be uploaded
+                sessionFile.open(fileNameChar, ios::trunc);
+                if(!sessionFile.is_open())
+                {
+                    //TODO: Error point, file was not created
             
-            }
-            sessionFile.close();
+                }
+                sessionFile.close();
 
-            //End file access
-            releaseLock();
-            //Generate and send response
-            uchar buffer[] = {0xC0, 0x00, 0xA8, 0x8A, 0xA6, 0xA8, 0x40,
-            0x40, 0x60, 0x96, 0x6A, 0xAA, 0xA6, 0x98, 0x40, 0x61, 0x03, 0xF0,
-            0x00, 0xFB, 0x01, 0x00, 0xC0};
-            buffer[21] = (uchar)sessionId;
-            ::port1->sendPacket(buffer, 23);
+                //Update the text file that keeps track of files in directory
+                system("ls -p | grep -v \"/\">ls.txt");
+
+                //End file access
+                releaseLock();
+                //printf("never getting here\n");
+                //Generate and send response
+                uchar buffer[] = {0xC0, 0x00, 0xA8, 0x8A, 0xA6, 0xA8, 0x40,
+                                  0x40, 0x60, 0x96, 0x6A, 0xAA, 0xA6, 0x98,
+                                  0x40, 0x61, 0x03, 0xF0, 0x00, 0xFB, 0x01,
+                                  0x00, 0xC0};
+                buffer[21] = (uchar)sessionId;
+                ::port1->sendPacket(buffer, 23);
+            }
+            else
+            {
+                //printf("Downloading\n");
+                //Find how many blocks will be needed for transfer
+
+   
+                ifstream file;
+                file.open(fileNameChar,ios::binary|ios::in);
+
+                if (file.is_open())
+                {
+                    //Seek the end of the file
+                    file.seekg(0, ios::end);
+                    //Get the position of the end of the file
+                    long length = file.tellg();
+                    file.close();
+                    releaseLock();
+                    //Generate and send response
+                    uchar buffer[] = {0xC0, 0x00, 0xA8, 0x8A, 0xA6, 0xA8, 0x40,
+                                      0x40, 0x60, 0x96, 0x6A, 0xAA, 0xA6, 0x98,
+                                      0x40, 0x61, 0x03, 0xF0, 0x00, 0xFC, 0x02,
+                                      0x00, 0x00, 0xC0};
+                buffer[21] = (uchar)sessionId;
+                buffer[22] = (uchar)(length/59+1);
+                //printf("\nBlocks: %i\n", (int)buffer[22]);
+                ::port1->sendPacket(buffer, 24);
+                }
+
+                else
+                {
+                    //TODO: error point, file could not be opened
+                    releaseLock();
+                }
+
+            }
+
         }
         else
         {
@@ -169,7 +289,7 @@ void FileManager::startSession(string fileName)
             //TODO : Error point here...could not open session file
         }
         //TODO: remove after testing
-        cout<<"\nReturning to main!\n";
+        //cout<<"\nReturning to main!\n";
     }
 }
 
@@ -180,7 +300,7 @@ void FileManager::startSession(string fileName)
 void FileManager::endSession(int sessionId)
 {
     //Remove the session from the private member data
-    sessionFiles_[sessionId] = "";
+    sessionFiles_[sessionId].name = "";
 
     ofstream sessionFile;
 
@@ -195,10 +315,11 @@ void FileManager::endSession(int sessionId)
         //Restore the contents of the session file
         for(int i = 0; i < 20; i++)
         {
-            if(sessionFiles_[i] != "")
+            if(sessionFiles_[i].name != "")
             {
 
-                sessionFile<<i<<" "<<sessionFiles_[i]<<"\n";
+                sessionFile<<i<<" "<<sessionFiles_[i].name<<" "
+                           <<sessionFiles_[i].isUpload<<"\n";
             }
         }
 

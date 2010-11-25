@@ -1,12 +1,13 @@
 ComPort.c++
 ComPort.h
+ComPort.o
 copied.txt
 cube_bigger.png
-.dep.inc
-dir
 FileManager.c++
 FileManager.h
+FileManager.o
+log
+ls.txt
 main.c++
 Makefile
 session.dat
-Test.txt

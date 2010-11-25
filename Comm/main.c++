@@ -46,15 +46,32 @@ int main(int argc, char** argv)
     FileManager fileManager;
     ::port1 = new ComPort(1);
     printf("Starting.\n");
+
+
+
+
+
+
     while(1)
     {
-        sleep(100);
         if (::isCommandReceived)
         {
+            fstream file;
+        file.open("log", ios::app| ios::out);
+        int n;
+        char test[30];
+
+            for (int i = 0; i<leng; i++)
+            {
+                n = sprintf(test,"TEMPBUFFER %i: %2x\n", i, ::tempDataBuffer[i]);
+                file.write(test, n);
+
+            }
+            file.close();
+
             //cout<<"\nCommand Received!\n";
             if(::isFilePacket)
             {
-                //printf("\nFile byte: %2x\n", tempDataBuffer[0]);
                 fileManager.writeBlock(::ses, ::block, ::leng, ::tempDataBuffer);
 
             }
@@ -63,22 +80,27 @@ int main(int argc, char** argv)
                 if (::tempDataBuffer[0] == 0xFB)
                 {
                     string fileName((char*)(::tempDataBuffer+2));
-                    //sprintf(fileName, "%s", tempDataBuffer+2);
-                    fileManager.startSession(fileName);
-                    delete[] ::tempDataBuffer;
-                    ::tempDataBuffer = NULL;
+                    fileManager.startSession(fileName, true);
                 }
                 else if (::tempDataBuffer[0] == 0xFA)
                 {
-                    //Abort Session
-                    //printf("\n%2x\n", tempDataBuffer[1]);
-                    //printf("\n%2x\n", tempDataBuffer[2]);
-                    
                     fileManager.endSession((int)(::tempDataBuffer[2]));
-                    delete[] ::tempDataBuffer;
-                    ::tempDataBuffer = NULL;
+                }
+                else if (::tempDataBuffer[0] == 0xFC)
+                {
+                    string fileName((char*)(::tempDataBuffer+2));
+                    fileManager.startSession(fileName, false);
+                }
+                else if(::tempDataBuffer[0] == 0xFD)
+                {
+                    //printf("Download request sent!\n");
+                    int sessionId = (int)(::tempDataBuffer[2]);
+                    int blockId = (int)(::tempDataBuffer[5]);
+                    fileManager.readBlock(sessionId, blockId);
                 }
             }
+            delete[] ::tempDataBuffer;
+            ::tempDataBuffer = NULL;
             ::isCommandReceived = false;
 
         }

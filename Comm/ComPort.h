@@ -23,6 +23,15 @@
 #include <string.h>
 #include <sys/signal.h>
 
+#include <fstream>
+using std::string;
+using std::ifstream;
+using std::ofstream;
+using std::ios;
+using std::fstream;
+
+
+
 //this is just for testing!
 extern uchar* tempDataBuffer;
 //testing!
