@@ -34,12 +34,6 @@ using std::fstream;
 
 //this is just for testing!
 extern uchar* tempDataBuffer;
-//testing!
-extern bool isFilePacket;
-//testing!
-extern int ses, block, leng;
-
-
 extern bool isCommandReceived;
 extern void signalHandler1(int status);
 

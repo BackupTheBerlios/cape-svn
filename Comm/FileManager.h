@@ -52,16 +52,16 @@ public:
     FileManager();
 
     ///Writes a block of file data to the filesystem.
-    void writeBlock(int sessionId, int blockId, int length, uchar* data);
+    void writeBlock(uchar* packet);
 
     ///Reads a block of data from the filesystem.
     void readBlock(int sessionId, int blockId);
 
     ///Opens a file transfer session.
-    void startSession(string fileName, bool isUpload);
+    void startSession(uchar* packet);
 
     ///Closes a file transfer session.
-    void endSession(int sessionId);
+    void endSession(uchar* packet);
 
     ///Standard destructor.
     ~FileManager();

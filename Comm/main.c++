@@ -11,8 +11,10 @@
 
 
 #include <pthread.h>
+#include <sys/time.h>
 #include "FileManager.h"
 #include "ComPort.h"
+
 
 using namespace std;
 #define uchar unsigned char
@@ -27,10 +29,6 @@ char command[5];
 ComPort* port1;
 //this is only for testing
 uchar* tempDataBuffer;
-//this is only for testing
-bool isFilePacket = false;
-//TESTING
-int ses, block, leng;
 
 
 void signalHandler1 (int status)
@@ -47,64 +45,50 @@ int main(int argc, char** argv)
     ::port1 = new ComPort(1);
     printf("Starting.\n");
 
-
-
+    time_t tim = time(NULL);
+    cout<<tim<<"\n";
 
 
 
     while(1)
     {
+        sleep(100);
         if (::isCommandReceived)
         {
-            fstream file;
-        file.open("log", ios::app| ios::out);
-        int n;
-        char test[30];
-
-            for (int i = 0; i<leng; i++)
+        
+            
+            ::isCommandReceived = false;
+            if(::tempDataBuffer[0] >= 0x80)
             {
-                n = sprintf(test,"TEMPBUFFER %i: %2x\n", i, ::tempDataBuffer[i]);
-                file.write(test, n);
-
+  
+                fileManager.writeBlock(::tempDataBuffer);
+                
             }
-            file.close();
-
-            //cout<<"\nCommand Received!\n";
-            if(::isFilePacket)
-            {
-                fileManager.writeBlock(::ses, ::block, ::leng, ::tempDataBuffer);
-
-            }
-            else
-            {
-                if (::tempDataBuffer[0] == 0xFB)
+            
+            else if(::tempDataBuffer[1] == 0xFB)
+                {
+                    fileManager.startSession(::tempDataBuffer);
+                }
+                else if (::tempDataBuffer[1] == 0xFA)
+                {
+                    fileManager.endSession(::tempDataBuffer);
+                }
+                else if (::tempDataBuffer[1] == 0xFC)
                 {
                     string fileName((char*)(::tempDataBuffer+2));
-                    fileManager.startSession(fileName, true);
+                    //fileManager.startSession(fileName, false);
                 }
-                else if (::tempDataBuffer[0] == 0xFA)
-                {
-                    fileManager.endSession((int)(::tempDataBuffer[2]));
-                }
-                else if (::tempDataBuffer[0] == 0xFC)
-                {
-                    string fileName((char*)(::tempDataBuffer+2));
-                    fileManager.startSession(fileName, false);
-                }
-                else if(::tempDataBuffer[0] == 0xFD)
+                else if(::tempDataBuffer[1] == 0xFD)
                 {
                     //printf("Download request sent!\n");
                     int sessionId = (int)(::tempDataBuffer[2]);
                     int blockId = (int)(::tempDataBuffer[5]);
                     fileManager.readBlock(sessionId, blockId);
                 }
-            }
-            delete[] ::tempDataBuffer;
-            ::tempDataBuffer = NULL;
-            ::isCommandReceived = false;
 
+              }
         }
-    }
+    
     return 0;
 }
 

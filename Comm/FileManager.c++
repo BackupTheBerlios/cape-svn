@@ -61,8 +61,17 @@ FileManager::FileManager()
  * through the use of a POSIX thread lock.  After the operation is performed, a
  * response is created and sent to the communication interface for transmission.
  */
-void FileManager::writeBlock(int sessionId, int blockId, int length, uchar* data)
+void FileManager::writeBlock(uchar* packet)
 {
+    ::tempDataBuffer = NULL;
+    int length = packet[0] - 0x80;
+    int sessionId = packet[1];
+    int blockId = 0;
+    blockId += (packet[2]<<16);
+    blockId += (packet[3]<<8);
+    blockId += (packet[4]);
+
+
     //Ensure mutual exclusion for file access
     acquireLock();
 
@@ -74,22 +83,23 @@ void FileManager::writeBlock(int sessionId, int blockId, int length, uchar* data
     file.open(fileNameChar,ios::binary|ios::in|ios::out);
     
     //Seek the starting point of the write
-    file.seekp((blockId-1)*MAX_PACKET_SIZE, ios::beg);
+    file.seekp((blockId)*MAX_PACKET_SIZE, ios::beg);
 
     //Write the data
-    file.write(reinterpret_cast<char*>(data), length);
+    file.write((char*)(packet+5), length);
     file.close();
 
     //File access complete
     releaseLock();
     
     //Create and send response
-    uchar buffer[] = {0xC0, 0x00, 0xA8, 0x8A, 0xA6, 0xA8, 0x40,
-            0x40, 0x60, 0x96, 0x6A, 0xAA, 0xA6, 0x98, 0x40, 0x61, 0x03, 0xF0,
-            0x00, 0xF0, 0x00, 0x00, 0x00, 0x00 ,0xC0};
-    buffer[20] = (uchar)sessionId;
-    buffer[23] = (uchar)blockId;
-    ::port1->sendPacket(buffer, 25);
+    uchar response[64] = {0x00};
+    response[0] = 0x00;
+    response[1] = 0xF0;
+    response[2] = 0x01;
+    response[3] = (uchar)sessionId;
+    ::port1->sendPacket(response, 64);
+
 }
 
 /**
@@ -177,9 +187,17 @@ void FileManager::readBlock(int sessionId, int blockId)
  * file, and then a response is created and sent to the communication interface
  * for transmission. Note that only 20 sessions may exist at any given time.
  */
-void FileManager::startSession(string fileName, bool isUpload)
+void FileManager::startSession(uchar* packet)
 {
-    //printf("start session\n");
+    ::tempDataBuffer = NULL;
+    bool isUpload = false;
+    if(packet[1] = 0xFB)
+    {
+        isUpload = true;
+    }
+
+    string fileName((char*)(packet+5));
+
     //sessionId will remain -1 if no free sessionId's are available
     int sessionId = -1;
     int i = 0;
@@ -218,13 +236,11 @@ void FileManager::startSession(string fileName, bool isUpload)
             sessionFile<<sessionId<<" "<<fileName<<" "<<isUpload<<"\n";
             sessionFile.close();
   
-            char *fileNameChar = (char*)fileName.c_str();
-
             if (isUpload)
             {
                 //printf("\nUploading\n");
                 //Create the file that is to be uploaded
-                sessionFile.open(fileNameChar, ios::trunc);
+                sessionFile.open((char*)(packet+5), ios::trunc);
                 if(!sessionFile.is_open())
                 {
                     //TODO: Error point, file was not created
@@ -237,14 +253,14 @@ void FileManager::startSession(string fileName, bool isUpload)
 
                 //End file access
                 releaseLock();
-                //printf("never getting here\n");
+ 
                 //Generate and send response
-                uchar buffer[] = {0xC0, 0x00, 0xA8, 0x8A, 0xA6, 0xA8, 0x40,
-                                  0x40, 0x60, 0x96, 0x6A, 0xAA, 0xA6, 0x98,
-                                  0x40, 0x61, 0x03, 0xF0, 0x00, 0xFB, 0x01,
-                                  0x00, 0xC0};
-                buffer[21] = (uchar)sessionId;
-                ::port1->sendPacket(buffer, 23);
+                uchar response[64] = {0x00};
+                response[0] = 0x00;
+                response[1] = 0xFB;
+                response[2] = 0x01;
+                response[3] = (uchar)sessionId;
+                ::port1->sendPacket(response, 64);
             }
             else
             {
@@ -253,7 +269,7 @@ void FileManager::startSession(string fileName, bool isUpload)
 
    
                 ifstream file;
-                file.open(fileNameChar,ios::binary|ios::in);
+                file.open((char*)(packet+5),ios::binary|ios::in);
 
                 if (file.is_open())
                 {
@@ -261,17 +277,26 @@ void FileManager::startSession(string fileName, bool isUpload)
                     file.seekg(0, ios::end);
                     //Get the position of the end of the file
                     long length = file.tellg();
+                    if (length%MAX_PACKET_SIZE == 0)
+                    {
+                        length = length/MAX_PACKET_SIZE;
+                    }
+                    else
+                    {
+                        length = (length/MAX_PACKET_SIZE) +1;
+                    }
                     file.close();
                     releaseLock();
+
                     //Generate and send response
-                    uchar buffer[] = {0xC0, 0x00, 0xA8, 0x8A, 0xA6, 0xA8, 0x40,
-                                      0x40, 0x60, 0x96, 0x6A, 0xAA, 0xA6, 0x98,
-                                      0x40, 0x61, 0x03, 0xF0, 0x00, 0xFC, 0x02,
-                                      0x00, 0x00, 0xC0};
-                buffer[21] = (uchar)sessionId;
-                buffer[22] = (uchar)(length/59+1);
-                //printf("\nBlocks: %i\n", (int)buffer[22]);
-                ::port1->sendPacket(buffer, 24);
+                    uchar response[64] = {0x00};
+                    response[0] = 0x00;
+                    response[1] = 0xFC;
+                    response[2] = 0x04;
+                    response[3] = (uchar)sessionId;
+                    response[4] = (uchar)(length>>16);
+                    response[5] = (uchar)(length>>8);
+                    response[6] = (uchar)(length); 
                 }
 
                 else
@@ -291,14 +316,16 @@ void FileManager::startSession(string fileName, bool isUpload)
         //TODO: remove after testing
         //cout<<"\nReturning to main!\n";
     }
+    delete[] packet;
 }
 
 /**
  * Removes the session from the session file and sends a response regarding if
  * any errors were encountered in the procedure.
  */
-void FileManager::endSession(int sessionId)
+void FileManager::endSession(uchar* packet)
 {
+    int sessionId = packet[3];
     //Remove the session from the private member data
     sessionFiles_[sessionId].name = "";
 
@@ -328,13 +355,13 @@ void FileManager::endSession(int sessionId)
         //End file access
         releaseLock();
 
-        //Generate and send response
-        uchar buffer[] = {0xC0, 0x00, 0xA8, 0x8A, 0xA6, 0xA8, 0x40, 0x40, 0x60,
-                          0x96, 0x6A, 0xAA, 0xA6, 0x98, 0x40, 0x61, 0x03, 0xF0,
-                          0x00, 0xFA, 0x01, 0x00, 0xC0};
-
-        buffer[21] = (uchar)sessionId;
-        ::port1->sendPacket(buffer, 23);
+        //Create and send response
+        uchar response[64] = {0x00};
+        response[0] = 0x00;
+        response[1] = 0xFA;
+        response[2] = 0x01;
+        response[3] = (uchar)sessionId;
+        ::port1->sendPacket(response, 64);
     }
     else
     {
