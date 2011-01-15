@@ -83,7 +83,7 @@ void FileManager::writeBlock(uchar* packet)
     file.open(fileNameChar,ios::binary|ios::in|ios::out);
     
     //Seek the starting point of the write
-    file.seekp((blockId)*MAX_PACKET_SIZE, ios::beg);
+    file.seekp(blockId*MAX_PACKET_SIZE, ios::beg);
 
     //Write the data
     file.write((char*)(packet+5), length);
@@ -107,9 +107,16 @@ void FileManager::writeBlock(uchar* packet)
  * the use of a lock to ensure mutual exclusion.  The data read from the file
  * will be sent to the communication interface to be transmitted.
  */
-void FileManager::readBlock(int sessionId, int blockId)
+void FileManager::readBlock(uchar* packet)
+//(int sessionId, int blockId)
 {
-    uchar* data = new uchar[MAX_PACKET_SIZE];
+    int sessionId = packet[3];
+    int blockId = 0;
+    blockId += (packet[4]<<16);
+    blockId += (packet[5]<<8);
+    blockId += (packet[6]);
+
+   
     //Ensure mutual exclusion for file access
     acquireLock();
 
@@ -129,51 +136,37 @@ void FileManager::readBlock(int sessionId, int blockId)
     long length = file.tellg();
 
     //Seek the starting point of the write
-    file.seekg((blockId-1)*MAX_PACKET_SIZE, ios::beg);
+    file.seekg(blockId*MAX_PACKET_SIZE, ios::beg);
 
     long remaining = length - file.tellg();
     //printf("\nBLOCKID: %i REMAIN: %d  length: %d\n",blockId ,remaining, length);
+
+
+    //Create and send response
+
+    uchar response[64] = {0x00};
+    
+    response[1] = (uchar)sessionId;
+    response[2] = (uchar)(blockId>>16);
+    response[3] = (uchar)(blockId>>8);
+    response[4] = (uchar)(blockId);
+
     //Check if this is the last packet in the file
     if(remaining < MAX_PACKET_SIZE)
     {
-        file.read((char*)data, (int)remaining);
-
-        //Generate and send response
-        //Create and send response
-        uchar headerData[] = {0xC0, 0x00, 0xA8, 0x8A, 0xA6, 0xA8, 0x40, 0x40,
-                              0x60, 0x96, 0x6A, 0xAA, 0xA6, 0x98, 0x40, 0x61,
-                              0x03, 0xF0, 0x00, 0xFD, 0x00, 0x00, 0x00, 0x00,
-                              0x00};
-        headerData[20] = (uchar)remaining;
-        headerData[21] = (uchar)sessionId;
-        headerData[24] = (uchar)blockId;
-        uchar lastByte[] = {0xC0};
-        ::port1->sendPacket(headerData, 25);
-        ::port1->sendPacket(data, (int)remaining);
-        ::port1->sendPacket(lastByte, 1);
+        response[0] = ((uchar)remaining)+0x80;
+        //Read the data
+        file.read((char*)response+5, (int)remaining);
 
     }
     else
     {
+        response[0] = ((uchar)MAX_PACKET_SIZE) + 0x80;
         //Read the data
-        file.read(reinterpret_cast<char*>(data), MAX_PACKET_SIZE);
-    
-        //Generate and send response
-        //Create and send response
-        uchar headerData[] = {0xC0, 0x00, 0xA8, 0x8A, 0xA6, 0xA8, 0x40, 0x40, 
-                              0x60, 0x96, 0x6A, 0xAA, 0xA6, 0x98, 0x40, 0x61, 
-                              0x03, 0xF0, 0x00, 0xFD, 0x00, 0x00, 0x00, 0x00,
-                              0x00};
-        headerData[20] = (uchar)MAX_PACKET_SIZE;
-        headerData[21] = (uchar)sessionId;
-        headerData[24] = (uchar)blockId;
-        uchar lastByte[] = {0xC0};
-        ::port1->sendPacket(headerData, 25);
-        ::port1->sendPacket(data, MAX_PACKET_SIZE);
-        ::port1->sendPacket(lastByte, 1);
+        file.read((char*)response+5, MAX_PACKET_SIZE);
     
     }
-
+    ::port1->sendPacket(response, 64);
 
     file.close();
 
@@ -190,14 +183,21 @@ void FileManager::readBlock(int sessionId, int blockId)
 void FileManager::startSession(uchar* packet)
 {
     ::tempDataBuffer = NULL;
-    bool isUpload = false;
-    if(packet[1] = 0xFB)
+    bool isUpload;
+    string fileName;
+    if(packet[1] == 0xFB)
     {
         isUpload = true;
+        string temp((char*)(packet+5));
+        fileName = temp;
     }
-
-    string fileName((char*)(packet+5));
-
+    else
+    {
+        string temp((char*)(packet+3));
+        fileName = temp;
+    }
+    
+    
     //sessionId will remain -1 if no free sessionId's are available
     int sessionId = -1;
     int i = 0;
@@ -238,9 +238,8 @@ void FileManager::startSession(uchar* packet)
   
             if (isUpload)
             {
-                //printf("\nUploading\n");
                 //Create the file that is to be uploaded
-                sessionFile.open((char*)(packet+5), ios::trunc);
+                sessionFile.open( ((char*)(packet+5)), ios::trunc);
                 if(!sessionFile.is_open())
                 {
                     //TODO: Error point, file was not created
@@ -264,12 +263,10 @@ void FileManager::startSession(uchar* packet)
             }
             else
             {
-                //printf("Downloading\n");
                 //Find how many blocks will be needed for transfer
 
-   
                 ifstream file;
-                file.open((char*)(packet+5),ios::binary|ios::in);
+                file.open(((char*)(packet+3)),ios::binary|ios::in);
 
                 if (file.is_open())
                 {
@@ -296,7 +293,8 @@ void FileManager::startSession(uchar* packet)
                     response[3] = (uchar)sessionId;
                     response[4] = (uchar)(length>>16);
                     response[5] = (uchar)(length>>8);
-                    response[6] = (uchar)(length); 
+                    response[6] = (uchar)(length);
+                    ::port1->sendPacket(response, 64);
                 }
 
                 else

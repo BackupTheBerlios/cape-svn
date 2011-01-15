@@ -55,7 +55,7 @@ public:
     void writeBlock(uchar* packet);
 
     ///Reads a block of data from the filesystem.
-    void readBlock(int sessionId, int blockId);
+    void readBlock(uchar* packet);
 
     ///Opens a file transfer session.
     void startSession(uchar* packet);

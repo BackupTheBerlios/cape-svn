@@ -30,7 +30,8 @@ ComPort* port1;
 //this is only for testing
 uchar* tempDataBuffer;
 
-
+//Signal handlers are C based, so they cannot be part of a class.  Instead, the
+//class member function is being called here.
 void signalHandler1 (int status)
 {
     ::port1->signalHandler();
@@ -41,15 +42,17 @@ void signalHandler1 (int status)
 
 int main(int argc, char** argv)
 {
+    //Instantiate the file manager and com port
     FileManager fileManager;
     ::port1 = new ComPort(1);
     printf("Starting.\n");
 
+
     time_t tim = time(NULL);
-    cout<<tim<<"\n";
+    //cout<<tim<<"\n";
 
 
-
+    //Wait until a command has been received.
     while(1)
     {
         sleep(100);
@@ -58,13 +61,16 @@ int main(int argc, char** argv)
         
             
             ::isCommandReceived = false;
+
+            //Check if incoming packet is a file packet.
             if(::tempDataBuffer[0] >= 0x80)
             {
   
                 fileManager.writeBlock(::tempDataBuffer);
                 
             }
-            
+
+            //Check for the file commands
             else if(::tempDataBuffer[1] == 0xFB)
                 {
                     fileManager.startSession(::tempDataBuffer);
@@ -75,15 +81,11 @@ int main(int argc, char** argv)
                 }
                 else if (::tempDataBuffer[1] == 0xFC)
                 {
-                    string fileName((char*)(::tempDataBuffer+2));
-                    //fileManager.startSession(fileName, false);
+                    fileManager.startSession(::tempDataBuffer);
                 }
                 else if(::tempDataBuffer[1] == 0xFD)
                 {
-                    //printf("Download request sent!\n");
-                    int sessionId = (int)(::tempDataBuffer[2]);
-                    int blockId = (int)(::tempDataBuffer[5]);
-                    fileManager.readBlock(sessionId, blockId);
+                    fileManager.readBlock(::tempDataBuffer);
                 }
 
               }
