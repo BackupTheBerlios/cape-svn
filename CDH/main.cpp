@@ -37,8 +37,6 @@ int main(int argc, char** argv)
         /* Matt: If the "-e" argument is passed, set printError to true. This
          * will output error logging events to stdout.
          */
-
-
         else if(!strcmp(argv[i], "-e"))
         {
             printError = true;

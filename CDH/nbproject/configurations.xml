@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configurationDescriptor version="69">
+<configurationDescriptor version="62">
   <logicalFolder name="root" displayName="root" projectFiles="true">
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
-                   projectFiles="true"
-                   kind="SOURCE_LOGICAL_FOLDER">
+                   projectFiles="true">
       <itemPath>cd_queues.h</itemPath>
-      <itemPath>command_handling.h</itemPath>
       <itemPath>data_handling.h</itemPath>
       <itemPath>data_link.h</itemPath>
       <itemPath>data_types.h</itemPath>
@@ -15,13 +13,11 @@
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
-                   projectFiles="true"
-                   kind="SOURCE_LOGICAL_FOLDER">
+                   projectFiles="true">
     </logicalFolder>
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
-                   projectFiles="true"
-                   kind="SOURCE_LOGICAL_FOLDER">
+                   projectFiles="true">
       <itemPath>cd_queues.cpp</itemPath>
       <itemPath>command_handling.cpp</itemPath>
       <itemPath>data_handling.cpp</itemPath>
@@ -29,15 +25,9 @@
       <itemPath>low_speed_link.cpp</itemPath>
       <itemPath>main.cpp</itemPath>
     </logicalFolder>
-    <logicalFolder name="TestFiles"
-                   displayName="Test Files"
-                   projectFiles="false"
-                   kind="TEST_LOGICAL_FOLDER">
-    </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
-                   projectFiles="false"
-                   kind="IMPORTANT_FILES_FOLDER">
+                   projectFiles="false">
       <itemPath>Makefile</itemPath>
     </logicalFolder>
   </logicalFolder>
@@ -51,7 +41,9 @@
       </toolsSet>
       <compileType>
         <linkerTool>
-          <commandLine>-pthread</commandLine>
+          <linkerLibItems>
+            <linkerOptionItem>-lpthread</linkerOptionItem>
+          </linkerLibItems>
         </linkerTool>
       </compileType>
     </conf>
@@ -71,9 +63,10 @@
         <fortranCompilerTool>
           <developmentMode>5</developmentMode>
         </fortranCompilerTool>
-        <asmTool>
-          <developmentMode>5</developmentMode>
-        </asmTool>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
       </compileType>
     </conf>
   </confs>

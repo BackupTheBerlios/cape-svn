@@ -10,8 +10,6 @@
 # Environment
 MKDIR=mkdir
 CP=cp
-GREP=grep
-NM=nm
 CCADMIN=CCadmin
 RANLIB=ranlib
 CC=gcc
@@ -33,13 +31,12 @@ OBJECTDIR=build/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
-	${OBJECTDIR}/command_handling.o \
 	${OBJECTDIR}/low_speed_link.o \
-	${OBJECTDIR}/logger.o \
+	${OBJECTDIR}/cd_queues.o \
+	${OBJECTDIR}/command_handling.o \
 	${OBJECTDIR}/data_handling.o \
 	${OBJECTDIR}/main.o \
-	${OBJECTDIR}/cd_queues.o
-
+	${OBJECTDIR}/logger.o
 
 # C Compiler Flags
 CFLAGS=
@@ -55,45 +52,45 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=
+LDLIBSOPTIONS=-lpthread
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
-	"${MAKE}"  -f nbproject/Makefile-Debug.mk dist/Debug/GNU-Linux-x86/cdh
+	${MAKE}  -f nbproject/Makefile-Debug.mk dist/Debug/GNU-Linux-x86/cdh
 
 dist/Debug/GNU-Linux-x86/cdh: ${OBJECTFILES}
 	${MKDIR} -p dist/Debug/GNU-Linux-x86
-	${LINK.cc} -pthread -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/cdh ${OBJECTFILES} ${LDLIBSOPTIONS} 
+	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/cdh ${OBJECTFILES} ${LDLIBSOPTIONS} 
 
-${OBJECTDIR}/command_handling.o: command_handling.cpp 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} $@.d
-	$(COMPILE.cc) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/command_handling.o command_handling.cpp
-
-${OBJECTDIR}/low_speed_link.o: low_speed_link.cpp 
+${OBJECTDIR}/low_speed_link.o: nbproject/Makefile-${CND_CONF}.mk low_speed_link.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.cc) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/low_speed_link.o low_speed_link.cpp
 
-${OBJECTDIR}/logger.o: logger.cpp 
+${OBJECTDIR}/cd_queues.o: nbproject/Makefile-${CND_CONF}.mk cd_queues.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.cc) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/logger.o logger.cpp
+	$(COMPILE.cc) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/cd_queues.o cd_queues.cpp
 
-${OBJECTDIR}/data_handling.o: data_handling.cpp 
+${OBJECTDIR}/command_handling.o: nbproject/Makefile-${CND_CONF}.mk command_handling.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.cc) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/command_handling.o command_handling.cpp
+
+${OBJECTDIR}/data_handling.o: nbproject/Makefile-${CND_CONF}.mk data_handling.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.cc) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/data_handling.o data_handling.cpp
 
-${OBJECTDIR}/main.o: main.cpp 
+${OBJECTDIR}/main.o: nbproject/Makefile-${CND_CONF}.mk main.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.cc) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/main.o main.cpp
 
-${OBJECTDIR}/cd_queues.o: cd_queues.cpp 
+${OBJECTDIR}/logger.o: nbproject/Makefile-${CND_CONF}.mk logger.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.cc) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/cd_queues.o cd_queues.cpp
+	$(COMPILE.cc) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/logger.o logger.cpp
 
 # Subprojects
 .build-subprojects:

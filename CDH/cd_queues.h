@@ -27,7 +27,7 @@ public:
 
 protected:
     /* The command and data queues. */
-    static sem_t                 execHalt;  // Data availability semaphore.
+    static sem_t                 execHalt;  // The data availability semaphore.
     static queue<CommandInfo*>   cmdQueue;  // The command recieve queue.
     static queue<ScheduleEntry*> schQueue;  // The schedule queue.
     static queue<FileTransInfo*> fileQueue; // The file transfer queue.

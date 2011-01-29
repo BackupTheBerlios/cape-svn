@@ -11,7 +11,7 @@
 /* Defines the string literal for the low speed modem's serial port device.
  * Matt: TODO: This needs to be changed to the correct value.
  */
-#define LOWSPEED_TTY "/dev/pts/4"
+#define LOWSPEED_TTY "/dev/pts/2"
 
 /* Defines the baud rate of the low speed data link. */
 #define LOWSPEED_BAUD B9600
@@ -36,38 +36,69 @@ void LowSpeedLink::Handler(int status)
     /* Matt: Read all avaiable characters on the tty device. */
     int ret = read(fd, buff, 64);
 
-    /* Matt: This is just for testing! */
     for(int i = 0; i < ret; i+=1)
     {
-        if((buff[i] >= 97) && (buff[i] <= 122))
+
+        /*--------------------------------------------------------------------*/
+        /* Matt: This section is just for testing. */
+
+        if(buff[i] == 'x') exit(1);
+
+        /* Matt: This is a rough example of steps which need to be taken when a
+         * complete command packet has been recieved.
+         */
+        else if(buff[i] == 'c')
         {
-            /*
-            char ch[2] = {0, 0};
-            ch[0] = buff[i];
-            printf("%s", ch);
-            fflush(stdout);
-            */
+            /* Matt: The "pretend" command. */
+            uchar id      = 0x55;    // command id
+            uchar len     = 0x01;    // length of the command data
+            uchar data[1] = {0xAA};  // command data
 
-            if(buff[i] == 'x') exit(1);
-
-            else if(buff[i] == 'c')
-            {
-                uchar *data = new uchar[1];
-                data[0] = 0xAA;
-                CommandInfo *info = createCommandInfo(0x55, 0x1, data);
-                cmdQueue.push(info);
-                sem_post(&execHalt);
-            }
-
-            else if(buff[i] == 'f')
-            {
-                uchar *data = new uchar[1];
-                data[0] = 0xAA;
-                FileTransInfo *info = createFileTransInfo(0, 0, data, 0);
-                fileQueue.push(info);
-                sem_post(&execHalt);
-            }
+            /* Matt: Each of these three steps MUST be carried out for each
+             * command packet recieved.
+             *
+             * 1.) Create a new commmand info structure in which each piece of
+             *     the command will be packed.
+             *     NOTE: createCommandInfo makes a DEEP COPY of the command data
+             * 2.) Push the pointer to the command info structure into the
+             *     command queue.
+             * 3.) Increment the data availability semaphore.
+             */
+            CommandInfo *info = createCommandInfo(id, len, data); // step 1
+            cmdQueue.push(info);                                  // step 2
+            sem_post(&execHalt);                                  // step 3
         }
+
+        /* Matt: This is a rough example of steps which need to be taken when a
+         * complete file transfer packet has been recieved.
+         */
+        else if(buff[i] == 'f')
+        {
+            /* Matt: The "pretend" command. */
+            uchar sess    = 0x55;    // session id
+            uchar len     = 0x01;    // length of the file transfer data
+            uchar data[1] = {0xAA};  // file transfer data
+            uchar block   = 0x03;    // block id
+
+            /* Matt: Each of these three steps MUST be carried out for each
+             * file transfer packet recieved.
+             *
+             * 1.) Create a new file transfer info structure in which each piece
+             *     of the file transfer will be packed.
+             *     NOTE: createFileTransInfo makes a DEEP COPY of the file
+             *           transfer data
+             * 2.) Push the pointer to the file transfer info structure into the
+             *     file queue.
+             * 3.) Increment the data availability semaphore.
+             */
+            FileTransInfo *info = createFileTransInfo(sess, len,    // step 1
+                                                      data, block);
+            fileQueue.push(info);                                   // step 2
+            sem_post(&execHalt);                                    // step 3
+        }
+
+        /* Matt: End of the testing section. */
+        /*--------------------------------------------------------------------*/
     }
 }
 
