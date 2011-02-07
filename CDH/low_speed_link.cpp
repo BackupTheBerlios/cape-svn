@@ -11,7 +11,7 @@
 /* Defines the string literal for the low speed modem's serial port device.
  * Matt: TODO: This needs to be changed to the correct value.
  */
-#define LOWSPEED_TTY "/dev/pts/2"
+#define LOWSPEED_TTY "/dev/ttyS1"
 
 /* Defines the baud rate of the low speed data link. */
 #define LOWSPEED_BAUD B9600
@@ -178,21 +178,12 @@ int LowSpeedLink::Open()
 
     //Activate the settings for the port
 
-    /*
-    if(!tcsetattr(fd,TCSANOW,&term))
-    {
-        //TODO: Remove after done testing
-        printf("Port set successfully.\n");
-        exit(1);
-    }
-    else
+    if(tcsetattr(fd,TCSANOW,&term))
     {
         //TODO: Error point here, couldn not open the serial port
         printf("There was a problem setting the port!\n");
         exit(1);
     }
-    */
-   
 
     return DLINK_NONE;
 }

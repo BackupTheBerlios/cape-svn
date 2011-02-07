@@ -15,7 +15,7 @@
 #define	_GLOBAL_DATA_H
 
 /* Matt: This lock synchronizes output to stdout. */
-pthread_mutex_t printLock;
+pthread_mutex_t printLock = PTHREAD_MUTEX_INITIALIZER;
 
 // Matt: This sets whether or not error logging event are sent to stdout.
 bool printError;

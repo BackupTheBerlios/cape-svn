@@ -12,6 +12,7 @@
 #include "logger.h"
 #include "global_data.h"
 #include "data_link.h"
+using namespace std;
 /*
  * 
  */
@@ -82,7 +83,7 @@ int main(int argc, char** argv)
                            "/home/cdh/log/event",
                            "/home/cdh/log/diag");
     // Matt: NOTE: This needs to get done before any thread are created.
-    printLock = PTHREAD_MUTEX_INITIALIZER;
+    //printLock = PTHREAD_MUTEX_INITIALIZER;
 
     log->Diag(__LINE__, "Attempting to create executive thread...");
 

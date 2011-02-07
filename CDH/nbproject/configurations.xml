@@ -36,10 +36,20 @@
     <conf name="Debug" type="1">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
-        <compilerSet>GNU|GNU</compilerSet>
+        <compilerSet>armv5te-linux-gnueabi|Unknown</compilerSet>
         <platform>2</platform>
       </toolsSet>
       <compileType>
+        <cTool>
+          <incDir>
+            <pElem>/usr/include</pElem>
+          </incDir>
+        </cTool>
+        <ccTool>
+          <incDir>
+            <pElem>/usr/include</pElem>
+          </incDir>
+        </ccTool>
         <linkerTool>
           <linkerLibItems>
             <linkerOptionItem>-lpthread</linkerOptionItem>
