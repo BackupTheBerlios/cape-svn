@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configurationDescriptor version="62">
+<configurationDescriptor version="69">
   <logicalFolder name="root" displayName="root" projectFiles="true">
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
       <itemPath>cd_queues.h</itemPath>
+      <itemPath>command_handling.h</itemPath>
+      <itemPath>config.h</itemPath>
       <itemPath>data_handling.h</itemPath>
       <itemPath>data_link.h</itemPath>
       <itemPath>data_types.h</itemPath>
       <itemPath>global_data.h</itemPath>
       <itemPath>logger.h</itemPath>
+      <itemPath>scheduler.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
@@ -20,6 +23,7 @@
                    projectFiles="true">
       <itemPath>cd_queues.cpp</itemPath>
       <itemPath>command_handling.cpp</itemPath>
+      <itemPath>config.cpp</itemPath>
       <itemPath>data_handling.cpp</itemPath>
       <itemPath>logger.cpp</itemPath>
       <itemPath>low_speed_link.cpp</itemPath>
@@ -36,7 +40,7 @@
     <conf name="Debug" type="1">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
-        <compilerSet>armv5te-linux-gnueabi|Unknown</compilerSet>
+        <compilerSet>GNU|GNU</compilerSet>
         <platform>2</platform>
       </toolsSet>
       <compileType>
@@ -73,10 +77,6 @@
         <fortranCompilerTool>
           <developmentMode>5</developmentMode>
         </fortranCompilerTool>
-        <linkerTool>
-          <linkerLibItems>
-          </linkerLibItems>
-        </linkerTool>
       </compileType>
     </conf>
   </confs>
